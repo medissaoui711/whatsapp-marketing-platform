@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/providers/auth-provider';
 
 interface FeatureCheckResult {
   allowed: boolean;
@@ -15,11 +15,11 @@ interface FeatureCheckResult {
 export function useFeature(featureKey: string) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<FeatureCheckResult | null>(null);
-  const { data: session } = useSession();
+  const { user } = useAuth();
 
   const check = useCallback(
     async (action?: string, metadata?: any) => {
-      if (!session) {
+      if (!user) {
         setResult({
           allowed: false,
           reason: 'not_authenticated',
