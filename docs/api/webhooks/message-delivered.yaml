@@ -1,0 +1,42 @@
+post:
+  summary: Message delivered
+  description: |
+    Sent when a WhatsApp message is successfully delivered to the recipient.
+  operationId: webhookMessageDelivered
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            id:
+              type: string
+              description: unique event identifier
+            event:
+              type: string
+              enum: [message.delivered]
+              example: message.delivered
+            timestamp:
+              type: string
+              format: date-time
+            data:
+              type: object
+              properties:
+                messageId:
+                  type: string
+                contactId:
+                  type: string
+                phoneNumber:
+                  type: string
+                campaignId:
+                  type: string
+                  nullable: true
+                deliveredAt:
+                  type: string
+                  format: date-time
+            webhookId:
+              type: string
+  responses:
+    '200':
+      description: Webhook received successfully

@@ -1,0 +1,56 @@
+PaginationMeta:
+  type: object
+  properties:
+    page:
+      type: integer
+      example: 1
+    limit:
+      type: integer
+      example: 20
+    total:
+      type: integer
+      example: 100
+    totalPages:
+      type: integer
+      example: 5
+    hasNext:
+      type: boolean
+    hasPrev:
+      type: boolean
+
+ErrorResponse:
+  type: object
+  properties:
+    success:
+      type: boolean
+      example: false
+    error:
+      type: object
+      properties:
+        code:
+          type: string
+          example: VALIDATION_ERROR
+        message:
+          type: string
+        details:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+
+SuccessResponse:
+  type: object
+  properties:
+    success:
+      type: boolean
+      example: true
+    data:
+      type: object
+    meta:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/PaginationMeta'
+        timestamp:
+          type: string
+          format: date-time

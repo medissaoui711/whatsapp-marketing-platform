@@ -1,0 +1,53 @@
+name: Deploy to Production
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    branches: [main]
+    types: [completed]
+
+jobs:
+  deploy:
+    name: Deploy with Zero-Downtime
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - run: |
+          scp scripts/deploy.sh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:~/deploy.sh
+          scp scripts/rollback.sh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:~/rollback.sh
+          scp docker-compose.production.yml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:~/docker-compose.yml
+          scp .env.production ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:~/.env
+
+      - run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            chmod +x ~/deploy.sh
+            export DOCKER_REGISTRY=${{ secrets.DOCKER_REGISTRY }}
+            export DOCKER_IMAGE_NAME=${{ github.repository }}
+            export GITHUB_SHA=${{ github.sha }}
+            export SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }}
+            ~/deploy.sh
+          EOF
+
+      - if: success()
+        uses: slackapi/slack-github-action@v1.25
+        with:
+          payload: |
+            {
+              "text": "✅ Production deployment completed!\nCommit: ${{ github.sha }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - if: failure()
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            ~/rollback.sh
+          EOF

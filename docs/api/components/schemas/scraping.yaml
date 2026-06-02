@@ -1,0 +1,103 @@
+ScrapingJob:
+  type: object
+  properties:
+    id:
+      type: string
+    type:
+      type: string
+      enum: [twitter, instagram, linkedin, facebook]
+      example: twitter
+    status:
+      type: string
+      enum: [queued, running, completed, failed, cancelled]
+      example: running
+    targetUrl:
+      type: string
+      example: https://twitter.com/username
+    config:
+      type: object
+      properties:
+        maxPosts:
+          type: integer
+          example: 50
+        includeComments:
+          type: boolean
+          default: false
+        includeEngagement:
+          type: boolean
+          default: false
+    progress:
+      type: object
+      properties:
+        total:
+          type: integer
+        scraped:
+          type: integer
+        skipped:
+          type: integer
+        errors:
+          type: integer
+    result:
+      type: object
+      nullable: true
+      properties:
+        totalScraped:
+          type: integer
+        fileUrl:
+          type: string
+        contactsCreated:
+          type: integer
+    errorMessage:
+      type: string
+      nullable: true
+    createdAt:
+      type: string
+      format: date-time
+    startedAt:
+      type: string
+      format: date-time
+      nullable: true
+    completedAt:
+      type: string
+      format: date-time
+      nullable: true
+
+ScrapingStartInput:
+  type: object
+  required:
+    - type
+    - targetUrl
+  properties:
+    type:
+      type: string
+      enum: [twitter, instagram, linkedin, facebook]
+    targetUrl:
+      type: string
+      format: uri
+      example: https://twitter.com/username
+    config:
+      type: object
+      properties:
+        maxPosts:
+          type: integer
+          default: 50
+          maximum: 500
+        includeComments:
+          type: boolean
+          default: false
+        includeEngagement:
+          type: boolean
+          default: false
+
+ScrapingJobListResponse:
+  type: object
+  properties:
+    success:
+      type: boolean
+      example: true
+    data:
+      type: array
+      items:
+        $ref: '#/ScrapingJob'
+    meta:
+      $ref: '../common.yaml#/Pagination'

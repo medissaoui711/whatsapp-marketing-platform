@@ -1,0 +1,62 @@
+SuccessResponse:
+  type: object
+  properties:
+    success:
+      type: boolean
+      example: true
+    data:
+      type: object
+      description: البيانات المطلوبة (تختلف حسب الـ endpoint)
+    meta:
+      $ref: '#/Pagination'
+    message:
+      type: string
+      example: Operation completed successfully
+
+Error:
+  type: object
+  properties:
+    success:
+      type: boolean
+      example: false
+    error:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+            - UNAUTHORIZED
+            - FORBIDDEN
+            - NOT_FOUND
+            - VALIDATION_ERROR
+            - RATE_LIMIT_EXCEEDED
+            - INTERNAL_ERROR
+            - TENANT_NOT_FOUND
+            - INVALID_CREDENTIALS
+        message:
+          type: string
+        details:
+          type: object
+          description: تفاصيل إضافية (أخطاء التحقق من صحة البيانات)
+        timestamp:
+          type: string
+          format: date-time
+
+Pagination:
+  type: object
+  properties:
+    page:
+      type: integer
+      minimum: 1
+      example: 1
+    pageSize:
+      type: integer
+      minimum: 1
+      maximum: 100
+      example: 20
+    total:
+      type: integer
+      example: 150
+    totalPages:
+      type: integer
+      example: 8

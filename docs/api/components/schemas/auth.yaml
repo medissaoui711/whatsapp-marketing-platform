@@ -1,0 +1,45 @@
+User:
+  type: object
+  properties:
+    id:
+      type: string
+      example: cm0xqj0h00001e3f3h0g0g0g0
+    email:
+      type: string
+      format: email
+      example: owner@demo.com
+    name:
+      type: string
+      nullable: true
+      example: مدير النظام
+    role:
+      type: string
+      enum: [OWNER, ADMIN, MANAGER, MEMBER, VIEWER]
+      example: OWNER
+    isActive:
+      type: boolean
+      example: true
+    createdAt:
+      type: string
+      format: date-time
+
+UserWithTenant:
+  allOf:
+    - $ref: '#/User'
+    - type: object
+      properties:
+        tenant:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            slug:
+              type: string
+            planId:
+              type: string
+            status:
+              type: string
+
+

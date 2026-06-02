@@ -1,0 +1,91 @@
+[app]
+name = "Whatomate"
+environment = "development"
+debug = true
+encryption_key = "change-this-in-production-32byte!!"
+
+[server]
+host = "0.0.0.0"
+port = 3000
+base_path = ""
+allowed_origins = "http://localhost:3000,https://yourdomain.com"
+
+[database]
+host = "localhost"
+port = 5432
+user = "postgres"
+password = "postgres"
+name = "saas_platform"
+ssl_mode = "disable"
+max_open_conns = 25
+max_idle_conns = 5
+conn_max_lifetime = 300
+
+[redis]
+host = "localhost"
+port = 6379
+db = 0
+tls = false
+
+[jwt]
+secret = "your-jwt-secret-min-32-characters!!"
+refresh_secret = "your-refresh-secret-min-32-characters!!"
+access_expiry_mins = 15
+refresh_expiry_days = 7
+
+[whatsapp]
+webhook_verify_token = "your-verify-token"
+api_version = "v18.0"
+base_url = "https://graph.facebook.com"
+
+[ai]
+openai_key = ""
+anthropic_key = ""
+google_key = ""
+
+[storage]
+type = "local"
+local_path = "./uploads"
+# s3_bucket = "my-bucket"
+# s3_region = "us-east-1"
+
+[default_admin]
+email = "admin@demo.com"
+password = "admin123"
+full_name = "Admin User"
+
+[rate_limit]
+enabled = true
+login_max_attempts = 10
+register_max_attempts = 10
+refresh_max_attempts = 30
+sso_max_attempts = 10
+window_seconds = 60
+trust_proxy = false
+api_max_requests = 100
+api_window_seconds = 60
+
+[cookie]
+domain = ""
+secure = false
+
+[calling]
+max_call_duration = 300
+audio_dir = "./audio"
+hold_music_file = "hold_music.opus"
+transfer_timeout_secs = 120
+per_agent_timeout_secs = 60
+ringback_file = "ringback.opus"
+udp_port_min = 10000
+udp_port_max = 10100
+public_ip = ""
+relay_only = false
+recording_enabled = false
+
+[[calling.ice_servers]]
+urls = ["stun:stun.l.google.com:19302"]
+
+[tts]
+piper_binary = "piper"
+piper_model = "./models/voice.onnx"
+opusenc_binary = "opusenc"

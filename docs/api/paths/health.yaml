@@ -1,0 +1,83 @@
+get:
+  summary: Health check
+  description: Returns the health status of all system services.
+  tags:
+    - Health
+  responses:
+    '200':
+      description: All services healthy
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: [healthy]
+                example: healthy
+              timestamp:
+                type: string
+                format: date-time
+              uptime:
+                type: number
+                description: server uptime in seconds
+              services:
+                type: object
+                properties:
+                  database:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        enum: [up, down]
+                      latency:
+                        type: number
+                        description: response time in milliseconds
+                  redis:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        enum: [up, down]
+                      latency:
+                        type: number
+                  queue:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        enum: [up, down]
+                      pendingJobs:
+                        type: integer
+    '503':
+      description: One or more services unhealthy
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: [unhealthy]
+              timestamp:
+                type: string
+                format: date-time
+              services:
+                type: object
+                properties:
+                  database:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        enum: [up, down]
+                      error:
+                        type: string
+                  redis:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        enum: [up, down]
+                      error:
+                        type: string

@@ -1,0 +1,234 @@
+list:
+  get:
+    summary: List contacts
+    description: Returns a paginated list of contacts with optional filters.
+    tags:
+      - Contacts
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yaml#/components/parameters/PageParam'
+      - $ref: '../openapi.yaml#/components/parameters/PageSizeParam'
+      - $ref: '../openapi.yaml#/components/parameters/SearchParam'
+      - $ref: '../openapi.yaml#/components/parameters/TagFilterParam'
+      - $ref: '../openapi.yaml#/components/parameters/GroupFilterParam'
+      - $ref: '../openapi.yaml#/components/parameters/SourceFilterParam'
+    responses:
+      '200':
+        description: Paginated contact list
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yaml#/components/schemas/ContactListResponse'
+
+  post:
+    summary: Create contact
+    description: Create a new contact record.
+    tags:
+      - Contacts
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../openapi.yaml#/components/schemas/ContactCreate'
+    responses:
+      '201':
+        description: Contact created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                data:
+                  $ref: '../openapi.yaml#/components/schemas/Contact'
+      '409':
+        description: Contact with this phone number already exists
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yaml#/components/schemas/Error'
+
+single:
+  get:
+    summary: Get contact
+    description: Returns a single contact by ID.
+    tags:
+      - Contacts
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yaml#/components/parameters/ContactIdParam'
+    responses:
+      '200':
+        description: Contact details
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                data:
+                  $ref: '../openapi.yaml#/components/schemas/Contact'
+      '404':
+        description: Contact not found
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yaml#/components/schemas/Error'
+
+  put:
+    summary: Update contact
+    description: Update an existing contact record.
+    tags:
+      - Contacts
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yaml#/components/parameters/ContactIdParam'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../openapi.yaml#/components/schemas/ContactUpdate'
+    responses:
+      '200':
+        description: Contact updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                data:
+                  $ref: '../openapi.yaml#/components/schemas/Contact'
+      '404':
+        description: Contact not found
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yaml#/components/schemas/Error'
+
+  delete:
+    summary: Delete contact
+    description: Permanently delete a contact record.
+    tags:
+      - Contacts
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yaml#/components/parameters/ContactIdParam'
+    responses:
+      '200':
+        description: Contact deleted successfully
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yaml#/components/schemas/SuccessResponse'
+      '404':
+        description: Contact not found
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yaml#/components/schemas/Error'
+
+import:
+  post:
+    summary: Import contacts
+    description: Bulk import contacts from CSV or JSON file.
+    tags:
+      - Contacts
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              file:
+                type: string
+                format: binary
+                description: CSV or JSON file
+              tags:
+                type: array
+                items:
+                  type: string
+                description: tag IDs to apply to all imported contacts
+    responses:
+      '200':
+        description: Import completed
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                data:
+                  type: object
+                  properties:
+                    imported:
+                      type: integer
+                      example: 42
+                    skipped:
+                      type: integer
+                      example: 3
+                    errors:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          row:
+                            type: integer
+                          message:
+                            type: string
+      '413':
+        description: File too large (max 10MB)
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yaml#/components/schemas/Error'
+
+export:
+  get:
+    summary: Export contacts
+    description: Export contacts as CSV or JSON.
+    tags:
+      - Contacts
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: format
+        in: query
+        schema:
+          type: string
+          enum: [csv, json]
+          default: csv
+      - $ref: '../openapi.yaml#/components/parameters/TagFilterParam'
+      - $ref: '../openapi.yaml#/components/parameters/GroupFilterParam'
+    responses:
+      '200':
+        description: Exported file
+        content:
+          text/csv:
+            schema:
+              type: string
+              description: CSV file content
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../openapi.yaml#/components/schemas/Contact'

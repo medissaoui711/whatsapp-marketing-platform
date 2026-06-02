@@ -1,0 +1,8 @@
+{
+  "firstName": "أحمد",
+  "lastName": "محمد",
+  "phone": "+966501234567",
+  "email": "ahmed@example.com",
+  "tags": ["tag_id_1", "tag_id_2"],
+  "groups": ["group_id_1"]
+}

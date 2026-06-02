@@ -1,0 +1,157 @@
+openapi: 3.0.3
+info:
+  title: Scraper SaaS Platform API
+  description: |
+    منصة متكاملة لإدارة الكشط الآلي (Scraping) والحملات التسويقية عبر واتساب.
+    
+    ## الميزات الرئيسية
+    - كشط بيانات تويتر، إنستغرام، لينكد إن
+    - إدارة جهات الاتصال مع نظام علامات ومجموعات
+    - حملات تسويقية عبر واتساب Business API
+    - Webhooks للاستقبال الفوري للأحداث
+    - نظام متعدد المستأجرين (Multi-tenant) مع عزل كامل للبيانات
+    
+    ## المصادقة
+    يستخدم الـ API نظام JWT مع Refresh Tokens.
+    - Access Token صالح لمدة 15 دقيقة
+    - Refresh Token صالح لمدة 7 أيام (مخزن في httpOnly Cookie)
+    
+    ## Rate Limiting
+    | نوع الـ API | الحد | النافذة |
+    |-------------|------|---------|
+    | المصادقة | 5 محاولات | 15 دقيقة |
+    | القراءة (GET) | 60 طلب | دقيقة |
+    | الكتابة (POST/PUT/DELETE) | 30 طلب | دقيقة |
+    | الاستيراد/التصدير | 10 عمليات | ساعة |
+  version: 1.0.0
+  contact:
+    name: Scraper SaaS Team
+    email: support@scrapersaas.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.scrapersaas.com/v1
+    description: Production Server
+  - url: https://staging-api.scrapersaas.com/v1
+    description: Staging Server
+  - url: http://localhost:3000/api
+    description: Local Development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Auth
+    description: عمليات المصادقة وإدارة الجلسات
+  - name: Contacts
+    description: إدارة جهات الاتصال (CRM)
+  - name: Campaigns
+    description: إدارة الحملات التسويقية
+  - name: Scraping
+    description: إدارة مهام الكشط الآلي
+  - name: Webhooks
+    description: إدارة Webhooks الداخلة
+  - name: Health
+    description: فحص صحة النظام
+
+paths:
+  /auth/login:
+    $ref: './paths/auth.yaml#/login'
+  /auth/refresh:
+    $ref: './paths/auth.yaml#/refresh'
+  /auth/logout:
+    $ref: './paths/auth.yaml#/logout'
+  /auth/me:
+    $ref: './paths/auth.yaml#/me'
+
+  /contacts:
+    $ref: './paths/contacts.yaml#/list'
+  /contacts/{id}:
+    $ref: './paths/contacts.yaml#/single'
+  /contacts/import:
+    $ref: './paths/contacts.yaml#/import'
+  /contacts/export:
+    $ref: './paths/contacts.yaml#/export'
+
+  /campaigns:
+    $ref: './paths/campaigns.yaml#/list'
+  /campaigns/{id}:
+    $ref: './paths/campaigns.yaml#/single'
+  /campaigns/{id}/start:
+    $ref: './paths/campaigns.yaml#/start'
+  /campaigns/{id}/pause:
+    $ref: './paths/campaigns.yaml#/pause'
+  /campaigns/{id}/stats:
+    $ref: './paths/campaigns.yaml#/stats'
+
+  /scraping/start:
+    $ref: './paths/scraping.yaml#/start'
+  /scraping/jobs:
+    $ref: './paths/scraping.yaml#/jobs'
+  /scraping/jobs/{id}:
+    $ref: './paths/scraping.yaml#/job'
+
+  /webhooks:
+    $ref: './paths/webhooks.yaml#/list'
+  /webhooks/{id}:
+    $ref: './paths/webhooks.yaml#/single'
+
+  /health:
+    $ref: './paths/health.yaml'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        أدخل التوكن بهذا التنسيق: `Bearer <your-access-token>`
+        
+        يمكن الحصول على التوكن من `/api/auth/login`
+
+  schemas:
+    Error:
+      $ref: './components/schemas/common.yaml#/Error'
+    SuccessResponse:
+      $ref: './components/schemas/common.yaml#/SuccessResponse'
+    Pagination:
+      $ref: './components/schemas/common.yaml#/Pagination'
+
+    User:
+      $ref: './components/schemas/auth.yaml#/User'
+    UserWithTenant:
+      $ref: './components/schemas/auth.yaml#/UserWithTenant'
+
+    Contact:
+      $ref: './components/schemas/contact.yaml#/Contact'
+    ContactCreate:
+      $ref: './components/schemas/contact.yaml#/ContactCreate'
+    ContactUpdate:
+      $ref: './components/schemas/contact.yaml#/ContactUpdate'
+    ContactListResponse:
+      $ref: './components/schemas/contact.yaml#/ContactListResponse'
+
+    Campaign:
+      $ref: './components/schemas/campaign.yaml#/Campaign'
+    CampaignCreate:
+      $ref: './components/schemas/campaign.yaml#/CampaignCreate'
+    CampaignStats:
+      $ref: './components/schemas/campaign.yaml#/CampaignStats'
+
+    ScrapingJob:
+      $ref: './components/schemas/scraping.yaml#/ScrapingJob'
+
+    Webhook:
+      $ref: './components/schemas/webhook.yaml#/Webhook'
+
+  parameters:
+    PageParam:
+      $ref: './components/parameters.yaml#/PageParam'
+    PageSizeParam:
+      $ref: './components/parameters.yaml#/PageSizeParam'
+    ContactIdParam:
+      $ref: './components/parameters.yaml#/ContactIdParam'
+    CampaignIdParam:
+      $ref: './components/parameters.yaml#/CampaignIdParam'

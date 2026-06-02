@@ -1,0 +1,20 @@
+{
+  "owner": {
+    "tenantSlug": "demo-company",
+    "email": "owner@demo.com",
+    "password": "SecurePassword123!",
+    "name": "مدير النظام"
+  },
+  "admin": {
+    "tenantSlug": "demo-company",
+    "email": "admin@demo.com",
+    "password": "AdminPassword123!",
+    "name": "مسؤول"
+  },
+  "manager": {
+    "tenantSlug": "demo-company",
+    "email": "manager@demo.com",
+    "password": "ManagerPass123!",
+    "name": "مدير"
+  }
+}

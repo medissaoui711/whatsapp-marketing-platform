@@ -1,0 +1,13 @@
+{
+  "id": "evt_01j2xyz",
+  "event": "message.delivered",
+  "timestamp": "2026-01-15T14:30:00Z",
+  "data": {
+    "messageId": "wamid.example123",
+    "contactId": "cm0xqj0h00001e3f3h0g0g0g0",
+    "phoneNumber": "+966501234567",
+    "campaignId": "campaign_id_1",
+    "deliveredAt": "2026-01-15T14:30:05Z"
+  },
+  "webhookId": "wh_01j2abc"
+}

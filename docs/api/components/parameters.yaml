@@ -1,0 +1,34 @@
+PageParam:
+  name: page
+  in: query
+  description: رقم الصفحة (يبدأ من 1)
+  schema:
+    type: integer
+    minimum: 1
+    default: 1
+
+PageSizeParam:
+  name: pageSize
+  in: query
+  description: عدد العناصر في الصفحة الواحدة
+  schema:
+    type: integer
+    minimum: 1
+    maximum: 100
+    default: 20
+
+ContactIdParam:
+  name: id
+  in: path
+  required: true
+  description: معرف جهة الاتصال
+  schema:
+    type: string
+
+CampaignIdParam:
+  name: id
+  in: path
+  required: true
+  description: معرف الحملة
+  schema:
+    type: string

@@ -1,0 +1,90 @@
+Webhook:
+  type: object
+  properties:
+    id:
+      type: string
+    name:
+      type: string
+      example: My Webhook
+    url:
+      type: string
+      format: uri
+      example: https://example.com/webhook
+    events:
+      type: array
+      items:
+        type: string
+        enum:
+          - campaign.started
+          - campaign.completed
+          - message.delivered
+          - message.read
+          - message.failed
+          - contact.created
+          - scraping.completed
+      example:
+        - campaign.started
+        - message.delivered
+    secret:
+      type: string
+      description: webhook signing secret (only returned on creation)
+    status:
+      type: string
+      enum: [active, paused, disabled]
+      example: active
+    lastTriggeredAt:
+      type: string
+      format: date-time
+      nullable: true
+    failureCount:
+      type: integer
+      default: 0
+    createdAt:
+      type: string
+      format: date-time
+    updatedAt:
+      type: string
+      format: date-time
+
+WebhookCreate:
+  type: object
+  required:
+    - name
+    - url
+    - events
+  properties:
+    name:
+      type: string
+      minLength: 2
+      maxLength: 100
+    url:
+      type: string
+      format: uri
+    events:
+      type: array
+      items:
+        type: string
+        enum:
+          - campaign.started
+          - campaign.completed
+          - message.delivered
+          - message.read
+          - message.failed
+          - contact.created
+          - scraping.completed
+
+WebhookUpdate:
+  type: object
+  properties:
+    name:
+      type: string
+    url:
+      type: string
+      format: uri
+    events:
+      type: array
+      items:
+        type: string
+    status:
+      type: string
+      enum: [active, paused, disabled]

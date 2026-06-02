@@ -1,0 +1,117 @@
+start:
+  post:
+    summary: Start scraping job
+    description: Start a new automated web scraping job.
+    tags:
+      - Scraping
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../openapi.yaml#/components/schemas/ScrapingStartInput'
+    responses:
+      '201':
+        description: Scraping job created and queued
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                data:
+                  $ref: '../openapi.yaml#/components/schemas/ScrapingJob'
+      '400':
+        description: Invalid target URL or configuration
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yaml#/components/schemas/Error'
+
+jobs:
+  get:
+    summary: List scraping jobs
+    description: Returns a paginated list of scraping jobs for the organization.
+    tags:
+      - Scraping
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yaml#/components/parameters/PageParam'
+      - $ref: '../openapi.yaml#/components/parameters/PageSizeParam'
+      - name: status
+        in: query
+        schema:
+          type: string
+          enum: [queued, running, completed, failed, cancelled]
+        description: filter by job status
+      - name: type
+        in: query
+        schema:
+          type: string
+          enum: [twitter, instagram, linkedin, facebook]
+        description: filter by platform type
+    responses:
+      '200':
+        description: Paginated job list
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yaml#/components/schemas/ScrapingJobListResponse'
+
+job:
+  get:
+    summary: Get scraping job
+    description: Returns details of a specific scraping job.
+    tags:
+      - Scraping
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yaml#/components/parameters/ScrapingJobIdParam'
+    responses:
+      '200':
+        description: Job details
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                data:
+                  $ref: '../openapi.yaml#/components/schemas/ScrapingJob'
+      '404':
+        description: Job not found
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yaml#/components/schemas/Error'
+
+  delete:
+    summary: Cancel scraping job
+    description: Cancel a queued or running scraping job.
+    tags:
+      - Scraping
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yaml#/components/parameters/ScrapingJobIdParam'
+    responses:
+      '200':
+        description: Job cancelled successfully
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yaml#/components/schemas/SuccessResponse'
+      '400':
+        description: Job cannot be cancelled in its current status
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yaml#/components/schemas/Error'

@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ES2020",
+    "moduleResolution": "bundler",
+    "lib": ["ES2020"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "jsx": "preserve"
+  },
+  "references": [
+    { "path": "apps/web" },
+    { "path": "apps/worker" },
+    { "path": "packages/db" },
+    { "path": "packages/auth" },
+    { "path": "packages/queue" },
+    { "path": "packages/integrations" },
+    { "path": "packages/shared" },
+    { "path": "packages/config" },
+    { "path": "packages/cache" },
+    { "path": "packages/audit" },
+    { "path": "packages/calling" },
+    { "path": "packages/assignment" }
+  ],
+  "exclude": ["node_modules", "dist"]
+}

@@ -1,0 +1,39 @@
+post:
+  summary: حدث بدء الحملة
+  description: |
+    يتم إرسال هذا الـ Webhook عند بدء تنفيذ حملة تسويقية.
+    يحتوي على معرف الحملة وعدد الأهداف.
+  operationId: webhookCampaignStarted
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            id:
+              type: string
+              description: معرف فريد للحدث
+            event:
+              type: string
+              enum: [campaign.started]
+              example: campaign.started
+            timestamp:
+              type: string
+              format: date-time
+            data:
+              type: object
+              properties:
+                campaignId:
+                  type: string
+                name:
+                  type: string
+                totalTargets:
+                  type: integer
+            webhookId:
+              type: string
+  responses:
+    '200':
+      description: تم استلام الـ Webhook بنجاح
+    '429':
+      description: تم رفض الطلب بسبب كثرة الطلبات

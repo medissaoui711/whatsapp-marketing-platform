@@ -1,0 +1,142 @@
+login:
+  post:
+    summary: تسجيل الدخول إلى المنصة
+    description: |
+      يتم المصادقة باستخدام البريد الإلكتروني، كلمة المرور، ومعرّف المؤسسة (tenant slug).
+      عند النجاح، يتم إرجاع Access Token في الـ Response Body و Refresh Token في httpOnly Cookie.
+    tags:
+      - Auth
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - email
+              - password
+              - tenantSlug
+            properties:
+              email:
+                type: string
+                format: email
+                example: owner@demo.com
+              password:
+                type: string
+                format: password
+                example: SecurePassword123!
+              tenantSlug:
+                type: string
+                description: معرّف المؤسسة (الـ subdomain أو الـ slug)
+                example: demo-company
+    responses:
+      '200':
+        description: تم تسجيل الدخول بنجاح
+        headers:
+          Set-Cookie:
+            description: Refresh Token مخزن في httpOnly Cookie
+            schema:
+              type: string
+              example: auth_refresh_token=eyJhbGc...; HttpOnly; Secure; SameSite=Strict
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                user:
+                  $ref: '../components/schemas/auth.yaml#/User'
+                accessToken:
+                  type: string
+                  description: JWT Access Token (صالح لمدة 15 دقيقة)
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      '401':
+        description: بيانات الدخول غير صحيحة أو المؤسسة غير موجودة
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/common.yaml#/Error'
+
+refresh:
+  post:
+    summary: تجديد Access Token
+    description: |
+      يستخدم Refresh Token المخزن في الـ Cookie لتوليد Access Token جديد.
+      لا يحتاج هذا الـ endpoint إلى إرسال أي بيانات في الـ Body.
+    tags:
+      - Auth
+    responses:
+      '200':
+        description: تم تجديد التوكن بنجاح
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                accessToken:
+                  type: string
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      '401':
+        description: Refresh Token غير صالح أو منتهي الصلاحية
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/common.yaml#/Error'
+
+logout:
+  post:
+    summary: تسجيل الخروج
+    description: |
+      ينهي الجلسة الحالية ويزيل Refresh Token من الـ Cookie.
+    tags:
+      - Auth
+    responses:
+      '200':
+        description: تم تسجيل الخروج بنجاح
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+      '401':
+        description: غير مصرح (لا توجد جلسة نشطة)
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/common.yaml#/Error'
+
+me:
+  get:
+    summary: جلب بيانات المستخدم الحالي
+    description: يعيد معلومات المستخدم المصادق والمؤسسة التابع لها.
+    tags:
+      - Auth
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: تم جلب البيانات بنجاح
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                user:
+                  $ref: '../components/schemas/auth.yaml#/UserWithTenant'
+      '401':
+        description: غير مصرح (توكن غير صالح)
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/common.yaml#/Error'

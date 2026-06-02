@@ -1,0 +1,48 @@
+post:
+  summary: Contact created
+  description: |
+    Sent when a new contact is created via scraper, import, or webhook.
+  operationId: webhookContactCreated
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            id:
+              type: string
+              description: unique event identifier
+            event:
+              type: string
+              enum: [contact.created]
+              example: contact.created
+            timestamp:
+              type: string
+              format: date-time
+            data:
+              type: object
+              properties:
+                contactId:
+                  type: string
+                firstName:
+                  type: string
+                  nullable: true
+                lastName:
+                  type: string
+                  nullable: true
+                phone:
+                  type: string
+                  nullable: true
+                email:
+                  type: string
+                  format: email
+                  nullable: true
+                source:
+                  type: string
+                  enum: [scraper, import, webhook]
+            webhookId:
+              type: string
+  responses:
+    '200':
+      description: Webhook received successfully

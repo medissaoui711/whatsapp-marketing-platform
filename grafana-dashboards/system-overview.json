@@ -1,0 +1,36 @@
+{
+  "title": "SaaS Platform - System Overview",
+  "uid": "saas-system-overview",
+  "tags": ["production", "saas"],
+  "timezone": "browser",
+  "panels": [
+    {
+      "title": "CPU Usage",
+      "type": "graph",
+      "targets": [{ "expr": "rate(process_cpu_seconds_total{job='saas-production'}[1m])", "legendFormat": "{{instance}}" }]
+    },
+    {
+      "title": "Memory Usage",
+      "type": "graph",
+      "targets": [{ "expr": "process_resident_memory_bytes{job='saas-production'}", "legendFormat": "{{instance}}" }]
+    },
+    {
+      "title": "HTTP Requests",
+      "type": "graph",
+      "targets": [{ "expr": "rate(http_requests_total{job='saas-production'}[1m])", "legendFormat": "{{method}} {{status}}" }]
+    },
+    {
+      "title": "DB Pool Connections",
+      "type": "graph",
+      "targets": [
+        { "expr": "prisma_pool_connections_active{job='saas-production'}", "legendFormat": "active" },
+        { "expr": "prisma_pool_connections_idle{job='saas-production'}", "legendFormat": "idle" }
+      ]
+    },
+    {
+      "title": "Redis Memory",
+      "type": "graph",
+      "targets": [{ "expr": "redis_memory_used_bytes{job='redis'}", "legendFormat": "used" }]
+    }
+  ]
+}

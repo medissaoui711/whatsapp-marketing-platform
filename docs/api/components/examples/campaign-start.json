@@ -1,0 +1,8 @@
+{
+  "name": "حملة ترحيب يناير",
+  "type": "whatsapp",
+  "templateId": "template_welcome",
+  "targetType": "tag",
+  "targetId": "tag_id_1",
+  "scheduledAt": "2026-02-01T09:00:00Z"
+}

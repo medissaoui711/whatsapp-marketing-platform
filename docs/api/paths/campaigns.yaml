@@ -1,0 +1,231 @@
+list:
+  get:
+    summary: List campaigns
+    description: Returns a paginated list of campaigns.
+    tags:
+      - Campaigns
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yaml#/components/parameters/PageParam'
+      - $ref: '../openapi.yaml#/components/parameters/PageSizeParam'
+      - name: status
+        in: query
+        schema:
+          type: string
+          enum: [draft, scheduled, running, paused, completed]
+        description: filter by campaign status
+    responses:
+      '200':
+        description: Paginated campaign list
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                data:
+                  type: array
+                  items:
+                    $ref: '../openapi.yaml#/components/schemas/Campaign'
+                meta:
+                  $ref: '../openapi.yaml#/components/schemas/Pagination'
+
+  post:
+    summary: Create campaign
+    description: Create a new campaign.
+    tags:
+      - Campaigns
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../openapi.yaml#/components/schemas/CampaignCreate'
+    responses:
+      '201':
+        description: Campaign created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                data:
+                  $ref: '../openapi.yaml#/components/schemas/Campaign'
+
+single:
+  get:
+    summary: Get campaign
+    description: Returns a single campaign by ID.
+    tags:
+      - Campaigns
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yaml#/components/parameters/CampaignIdParam'
+    responses:
+      '200':
+        description: Campaign details
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                data:
+                  $ref: '../openapi.yaml#/components/schemas/Campaign'
+      '404':
+        description: Campaign not found
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yaml#/components/schemas/Error'
+
+  put:
+    summary: Update campaign
+    description: Update an existing campaign.
+    tags:
+      - Campaigns
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yaml#/components/parameters/CampaignIdParam'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../openapi.yaml#/components/schemas/CampaignCreate'
+    responses:
+      '200':
+        description: Campaign updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                data:
+                  $ref: '../openapi.yaml#/components/schemas/Campaign'
+      '404':
+        description: Campaign not found
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yaml#/components/schemas/Error'
+
+  delete:
+    summary: Delete campaign
+    description: Permanently delete a campaign.
+    tags:
+      - Campaigns
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yaml#/components/parameters/CampaignIdParam'
+    responses:
+      '200':
+        description: Campaign deleted successfully
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yaml#/components/schemas/SuccessResponse'
+      '404':
+        description: Campaign not found
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yaml#/components/schemas/Error'
+
+start:
+  post:
+    summary: Start campaign
+    description: Start executing a campaign. Only campaigns in draft or paused status can be started.
+    tags:
+      - Campaigns
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yaml#/components/parameters/CampaignIdParam'
+    responses:
+      '200':
+        description: Campaign started successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                data:
+                  $ref: '../openapi.yaml#/components/schemas/Campaign'
+      '400':
+        description: Campaign cannot be started in its current status
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yaml#/components/schemas/Error'
+
+pause:
+  post:
+    summary: Pause campaign
+    description: Pause a running campaign.
+    tags:
+      - Campaigns
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yaml#/components/parameters/CampaignIdParam'
+    responses:
+      '200':
+        description: Campaign paused successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                data:
+                  $ref: '../openapi.yaml#/components/schemas/Campaign'
+      '400':
+        description: Campaign is not currently running
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yaml#/components/schemas/Error'
+
+stats:
+  get:
+    summary: Get campaign statistics
+    description: Returns aggregate statistics across all campaigns.
+    tags:
+      - Campaigns
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: Campaign statistics
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                data:
+                  $ref: '../openapi.yaml#/components/schemas/CampaignStats'

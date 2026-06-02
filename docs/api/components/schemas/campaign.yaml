@@ -1,0 +1,87 @@
+Campaign:
+  type: object
+  properties:
+    id:
+      type: string
+    name:
+      type: string
+      example: حملة ترحيب يناير
+    type:
+      type: string
+      enum: [whatsapp, email]
+      example: whatsapp
+    status:
+      type: string
+      enum: [draft, scheduled, running, paused, completed]
+      example: running
+    scheduledAt:
+      type: string
+      format: date-time
+      nullable: true
+    templateId:
+      type: string
+      nullable: true
+    stats:
+      type: object
+      properties:
+        total:
+          type: integer
+        sent:
+          type: integer
+        delivered:
+          type: integer
+        read:
+          type: integer
+        failed:
+          type: integer
+    createdAt:
+      type: string
+      format: date-time
+    updatedAt:
+      type: string
+      format: date-time
+
+CampaignCreate:
+  type: object
+  required:
+    - name
+    - templateId
+  properties:
+    name:
+      type: string
+      minLength: 3
+      maxLength: 100
+    type:
+      type: string
+      enum: [whatsapp, email]
+      default: whatsapp
+    templateId:
+      type: string
+      description: معرف قالب الرسالة
+    targetType:
+      type: string
+      enum: [all, group, tag]
+      description: نوع الجمهور المستهدف
+    targetId:
+      type: string
+      description: معرف المجموعة أو العلامة (إذا كان targetType ليس all)
+    scheduledAt:
+      type: string
+      format: date-time
+      description: تاريخ الإرسال المجدول (اتركه فارغاً للإرسال الفوري)
+
+CampaignStats:
+  type: object
+  properties:
+    total:
+      type: integer
+    draft:
+      type: integer
+    scheduled:
+      type: integer
+    running:
+      type: integer
+    paused:
+      type: integer
+    completed:
+      type: integer

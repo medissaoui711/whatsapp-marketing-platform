@@ -1,0 +1,1363 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== ENUMS ====================
+
+enum CampaignStatus {
+  draft
+  scheduled
+  queued
+  processing
+  paused
+  completed
+  cancelled
+  failed
+}
+
+enum MessageStatus {
+  pending
+  sent
+  delivered
+  read
+  failed
+  received
+}
+
+enum MessageType {
+  text
+  image
+  video
+  audio
+  document
+  template
+  interactive
+  flow
+  reaction
+  location
+  contact
+}
+
+enum Direction {
+  incoming
+  outgoing
+}
+
+enum CallDirection {
+  incoming
+  outgoing
+}
+
+enum CallStatus {
+  ringing
+  answered
+  completed
+  missed
+  rejected
+  failed
+  transferring
+  initiating
+  accepted
+}
+
+enum DisconnectedBy {
+  client
+  agent
+  system
+}
+
+enum TeamRole {
+  manager
+  agent
+}
+
+enum TransferStatus {
+  active
+  resumed
+  completed
+  expired
+  abandoned
+}
+
+enum AssignmentStrategy {
+  round_robin
+  load_balanced
+  manual
+}
+
+enum ActionType {
+  webhook
+  url
+  javascript
+}
+
+enum AuditAction {
+  created
+  updated
+  deleted
+}
+
+enum SSOProviderType {
+  google
+  microsoft
+  github
+  facebook
+  custom
+}
+
+enum WebhookEvent {
+  message_incoming
+  message_outgoing
+  message_sent
+  contact_created
+  transfer_created
+  transfer_resumed
+  transfer_assigned
+}
+
+enum TemplateStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TemplateCategory {
+  MARKETING
+  UTILITY
+  AUTHENTICATION
+}
+
+// ==================== MODELS ====================
+
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  settings    Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  users            User[]
+  userOrganizations UserOrganization[]
+  whatsappAccounts WhatsAppAccount[]
+  teams            Team[]
+  apiKeys          APIKey[]
+  ssoProviders     SSOProvider[]
+  webhooks         Webhook[]
+  customActions    CustomAction[]
+  contacts         Contact[]
+  messages         Message[]
+  templates        Template[]
+  whatsappFlows    WhatsAppFlow[]
+  campaigns        BulkMessageCampaign[]
+  notificationRules NotificationRule[]
+  callLogs         CallLog[]
+  ivrFlows         IVRFlow[]
+  callTransfers    CallTransfer[]
+  callPermissions  CallPermission[]
+  cannedResponses  CannedResponse[]
+  catalogs         Catalog[]
+  conversationNotes ConversationNote[]
+  widgets          Widget[]
+  agentTransfers       AgentTransfer[]
+  chatbotSettings      ChatbotSettings[]
+  chatbotSessions      ChatbotSession[]
+  chatbotFlows         ChatbotFlow[]
+  aiContexts           AIContext[]
+  keywordRules         KeywordRule[]
+  auditLogs            AuditLog[]
+  userAvailabilityLogs UserAvailabilityLog[]
+  tags             Tag[]
+  customRoles      CustomRole[]
+  sessions            Session[]
+  tenantFeatures     TenantFeature[]
+  featureUsages      FeatureUsage[]
+  twitterAccounts    TwitterAccount[]
+  scrapingJobs       ScrapingJob[]
+  scraperRequestLogs ScraperRequestLog[]
+  groupJoinRequests  GroupJoinRequest[]
+  groupMemberships   UserGroupMembership[]
+  joinConsents       JoinConsent[]
+}
+
+model User {
+  id               String   @id @default(cuid())
+  organizationId   String?
+  email            String   @unique
+  passwordHash     String?
+  fullName         String?
+  roleId           String?
+  settings         Json     @default("{}")
+  twoFactorSecret  String?
+  twoFactorEnabled Boolean  @default(false)
+  isActive         Boolean  @default(true)
+  isAvailable      Boolean  @default(true)
+  isSuperAdmin     Boolean  @default(false)
+  ssoProvider      String?
+  ssoProviderId    String?
+  lastLoginAt      DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  organization        Organization?       @relation(fields: [organizationId], references: [id])
+  role                CustomRole?         @relation(fields: [roleId], references: [id])
+  userOrganizations   UserOrganization[]
+  teamMembers         TeamMember[]
+  createdTeams        Team[]              @relation("TeamCreatedBy")
+  updatedTeams        Team[]              @relation("TeamUpdatedBy")
+  createdTemplates    Template[]          @relation("TemplateCreatedBy")
+  updatedTemplates    Template[]          @relation("TemplateUpdatedBy")
+  createdWebhooks     Webhook[]           @relation("WebhookCreatedBy")
+  updatedWebhooks     Webhook[]           @relation("WebhookUpdatedBy")
+  createdWhatsAppAccounts WhatsAppAccount[] @relation("WhatsAppAccountCreatedBy")
+  updatedWhatsAppAccounts WhatsAppAccount[] @relation("WhatsAppAccountUpdatedBy")
+  sentMessages        Message[]           @relation("MessageSentBy")
+  assignedContacts    Contact[]           @relation("ContactAssignedTo")
+  createdCampaigns    BulkMessageCampaign[] @relation("CampaignCreatedBy")
+  updatedCampaigns    BulkMessageCampaign[] @relation("CampaignUpdatedBy")
+  callLogs            CallLog[]           @relation("CallLogAgent")
+  createdIVRFlows     IVRFlow[]           @relation("IVRFlowCreatedBy")
+  updatedIVRFlows     IVRFlow[]           @relation("IVRFlowUpdatedBy")
+  agentTransfers       AgentTransfer[]   @relation("TransferAgent")
+  initiatedTransfers   AgentTransfer[]   @relation("TransferInitiator")
+  resumedTransfers     AgentTransfer[]   @relation("TransferResumer")
+  callTransfers        CallTransfer[]    @relation("CallTransferAgent")
+  initiatingTransfers  CallTransfer[]    @relation("CallTransferInitiator")
+  requestedCallPermissions CallPermission[] @relation("CallPermissionRequestedBy")
+  createdCannedResponses CannedResponse[] @relation("CannedResponseCreatedBy")
+  createdWidgets      Widget[]            @relation("WidgetCreatedBy")
+  auditLogs           AuditLog[]          @relation("AuditLogUser")
+  createdAPIKeys      APIKey[]            @relation("APIKeyCreatedBy")
+  conversationNotes   ConversationNote[]  @relation("ConversationNoteCreatedBy")
+  refreshTokens       RefreshToken[]
+  sessions            Session[]
+  availabilityLogs    UserAvailabilityLog[]
+  featureUsages       FeatureUsage[]
+  scrapingJobs        ScrapingJob[]
+  scraperRequestLogs  ScraperRequestLog[]
+  groupJoinRequests   GroupJoinRequest[]
+  groupMemberships    UserGroupMembership[]
+  joinConsents        JoinConsent[]
+}
+
+model Session {
+  id             String   @id
+  userId         String
+  tenantId       String
+  createdAt      DateTime @default(now())
+  expiresAt      DateTime
+  lastActivityAt DateTime @default(now())
+  ipAddress      String?
+  userAgent      String?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tenantId])
+  @@index([expiresAt])
+}
+
+model UserOrganization {
+  id             String   @id @default(cuid())
+  userId         String
+  organizationId String
+  roleId         String?
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role         CustomRole?  @relation(fields: [roleId], references: [id])
+
+  @@unique([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model Team {
+  id                     String            @id @default(cuid())
+  organizationId         String
+  name                   String
+  description            String?
+  assignmentStrategy     AssignmentStrategy @default(round_robin)
+  perAgentTimeoutSecs    Int               @default(0)
+  isActive               Boolean           @default(true)
+  createdById            String?
+  updatedById            String?
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  members      TeamMember[]
+  createdBy    User?        @relation("TeamCreatedBy", fields: [createdById], references: [id])
+  updatedBy    User?        @relation("TeamUpdatedBy", fields: [updatedById], references: [id])
+  agentTransfers AgentTransfer[]
+
+  @@index([organizationId])
+}
+
+model TeamMember {
+  id             String     @id @default(cuid())
+  teamId         String
+  userId         String
+  role           TeamRole   @default(agent)
+  lastAssignedAt DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
+}
+
+model CustomRole {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  description    String?
+  isSystem       Boolean  @default(false)
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization      Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  users             User[]
+  userOrganizations UserOrganization[]
+  rolePermissions   RolePermission[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+}
+
+model Permission {
+  id          String   @id @default(cuid())
+  resource    String
+  action      String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rolePermissions RolePermission[]
+
+  @@unique([resource, action])
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  assignedAt   DateTime @default(now())
+
+  role       CustomRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model APIKey {
+  id             String    @id @default(cuid())
+  organizationId String
+  userId         String
+  name           String
+  keyPrefix      String?
+  keyHash        String
+  lastUsedAt     DateTime?
+  expiresAt      DateTime?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation("APIKeyCreatedBy", fields: [userId], references: [id])
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([keyPrefix])
+}
+
+model SSOProvider {
+  id               String   @id @default(cuid())
+  organizationId   String
+  provider         String   @default("custom")
+  clientId         String
+  clientSecret     String
+  isEnabled        Boolean  @default(false)
+  allowAutoCreate  Boolean  @default(false)
+  defaultRoleName  String   @default("agent")
+  allowedDomains   String?
+  authUrl          String?
+  tokenUrl         String?
+  userInfoUrl      String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, provider])
+  @@index([organizationId])
+}
+
+model Webhook {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  url            String
+  events         String[]
+  headers        Json     @default("{}")
+  secret         String?
+  isActive       Boolean  @default(true)
+  createdById    String?
+  updatedById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization  Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy     User?               @relation("WebhookCreatedBy", fields: [createdById], references: [id])
+  updatedBy     User?               @relation("WebhookUpdatedBy", fields: [updatedById], references: [id])
+  deliveryLogs  WebhookDeliveryLog[]
+
+  @@index([organizationId])
+  @@index([isActive])
+}
+
+model WebhookDeliveryLog {
+  id           String   @id @default(cuid())
+  webhookId    String
+  success      Boolean
+  errorMessage String?
+  payload      Json
+  sentAt       DateTime @default(now())
+  responseCode Int?
+
+  webhook Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId])
+}
+
+model CustomAction {
+  id             String     @id @default(cuid())
+  organizationId String
+  name           String
+  icon           String?
+  actionType     ActionType
+  config         Json       @default("{}")
+  isActive       Boolean    @default(true)
+  displayOrder   Int        @default(0)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+model WhatsAppAccount {
+  id                       String   @id @default(cuid())
+  organizationId           String
+  name                     String
+  appId                    String?
+  phoneId                  String
+  businessId               String
+  accessToken              String
+  appSecret                String?
+  webhookVerifyToken       String?
+  apiVersion               String   @default("v21.0")
+  isDefaultIncoming        Boolean  @default(false)
+  isDefaultOutgoing        Boolean  @default(false)
+  autoReadReceipt          Boolean  @default(false)
+  businessCallingEnabled   Boolean  @default(false)
+  status                   String   @default("active")
+  createdById              String?
+  updatedById              String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User?        @relation("WhatsAppAccountCreatedBy", fields: [createdById], references: [id])
+  updatedBy    User?        @relation("WhatsAppAccountUpdatedBy", fields: [updatedById], references: [id])
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+}
+
+model Contact {
+  id                     String     @id @default(cuid())
+  organizationId         String
+  phoneNumber            String
+  profileName            String?
+  whatsappAccount        String?
+  assignedUserId         String?
+  lastMessageAt          DateTime?
+  lastMessagePreview     String?
+  isRead                 Boolean    @default(true)
+  tags                   Json       @default("[]")
+  metadata               Json       @default("{}")
+  lastInboundAt          DateTime?
+  marketingOptOut        Boolean    @default(false)
+  bsuid                  String?
+  chatbotLastMessageAt   DateTime?
+  chatbotReminderSent    Boolean    @default(false)
+  createdAt              DateTime   @default(now())
+  updatedAt              DateTime   @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignedUser   User?        @relation("ContactAssignedTo", fields: [assignedUserId], references: [id])
+  messages       Message[]
+  callLogs       CallLog[]
+  agentTransfers AgentTransfer[]
+  callTransfers  CallTransfer[]
+  callPermissions CallPermission[]
+  chatbotSessions ChatbotSession[]
+  conversationNotes ConversationNote[]
+
+  @@index([organizationId])
+  @@index([phoneNumber])
+  @@index([assignedUserId])
+  @@index([bsuid])
+}
+
+model Message {
+  id                 String        @id @default(cuid())
+  organizationId     String
+  whatsappAccount    String
+  contactId          String
+  whatsappMessageId  String?
+  conversationId     String?
+  direction          Direction
+  messageType        MessageType
+  content            String?
+  mediaUrl           String?
+  mediaMimeType      String?
+  mediaFilename      String?
+  templateName       String?
+  templateParams     Json          @default("{}")
+  interactiveData    Json?
+  flowResponse       Json?
+  status             MessageStatus @default(pending)
+  errorMessage       String?
+  isReply            Boolean       @default(false)
+  replyToMessageId   String?
+  sentByUserId       String?
+  metadata           Json          @default("{}")
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  contact           Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  replyToMessage    Message?     @relation("MessageReply", fields: [replyToMessageId], references: [id])
+  sentByUser        User?        @relation("MessageSentBy", fields: [sentByUserId], references: [id])
+  campaignRecipients BulkMessageRecipient[]
+  replies           Message[]    @relation("MessageReply")
+
+  @@index([organizationId])
+  @@index([contactId])
+  @@index([whatsappMessageId])
+  @@index([conversationId])
+  @@index([sentByUserId])
+}
+
+model Template {
+  id                         String   @id @default(cuid())
+  organizationId             String
+  whatsappAccount            String
+  metaTemplateId             String?
+  name                       String
+  displayName                String?
+  language                   String   @default("en")
+  category                   String?
+  status                     String   @default("PENDING")
+  qualityRating              String   @default("UNKNOWN")
+  headerType                 String?
+  headerContent              String?
+  bodyContent                String
+  footerContent              String?
+  buttons                    Json     @default("[]")
+  sampleValues               Json     @default("[]")
+  addSecurityRecommendation  Boolean  @default(false)
+  codeExpirationMinutes      Int      @default(0)
+  createdById                String?
+  updatedById                String?
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User?        @relation("TemplateCreatedBy", fields: [createdById], references: [id])
+  updatedBy    User?        @relation("TemplateUpdatedBy", fields: [updatedById], references: [id])
+  campaigns    BulkMessageCampaign[]
+  notificationRules NotificationRule[]
+
+  @@index([organizationId])
+  @@index([whatsappAccount])
+  @@index([metaTemplateId])
+}
+
+model WhatsAppFlow {
+  id               String   @id @default(cuid())
+  organizationId   String
+  whatsappAccount  String
+  metaFlowId       String?
+  name             String
+  status           String   @default("DRAFT")
+  category         String?
+  jsonVersion      String   @default("6.0")
+  flowJson         Json?
+  screens          Json     @default("[]")
+  previewUrl       String?
+  hasLocalChanges  Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([whatsappAccount])
+  @@index([metaFlowId])
+}
+
+model BulkMessageCampaign {
+  id                    String         @id @default(cuid())
+  organizationId        String
+  whatsappAccount       String
+  name                  String
+  templateId            String
+  headerMediaId         String?
+  headerMediaFilename   String?
+  headerMediaMimeType   String?
+  headerMediaLocalPath  String?
+  status                CampaignStatus @default(draft)
+  totalRecipients       Int            @default(0)
+  sentCount             Int            @default(0)
+  deliveredCount        Int            @default(0)
+  readCount             Int            @default(0)
+  failedCount           Int            @default(0)
+  scheduledAt           DateTime?
+  startedAt             DateTime?
+  completedAt           DateTime?
+  createdBy             String
+  updatedById           String?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  organization Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  template     Template              @relation(fields: [templateId], references: [id])
+  creator      User                  @relation("CampaignCreatedBy", fields: [createdBy], references: [id])
+  updatedBy    User?                 @relation("CampaignUpdatedBy", fields: [updatedById], references: [id])
+  recipients   BulkMessageRecipient[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([scheduledAt])
+}
+
+model BulkMessageRecipient {
+  id                String        @id @default(cuid())
+  campaignId        String
+  phoneNumber       String
+  recipientName     String?
+  templateParams    Json          @default("{}")
+  headerParams      Json          @default("{}")
+  status            MessageStatus @default(pending)
+  whatsappMessageId String?
+  messageId         String?
+  errorMessage      String?
+  sentAt            DateTime?
+  deliveredAt       DateTime?
+  readAt            DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  campaign BulkMessageCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  message  Message?            @relation(fields: [messageId], references: [id])
+
+  @@index([campaignId])
+  @@index([status])
+  @@index([whatsappMessageId])
+}
+
+model NotificationRule {
+  id               String   @id @default(cuid())
+  organizationId   String
+  whatsappAccount  String
+  name             String
+  isEnabled        Boolean  @default(true)
+  triggerType      String
+  triggerConfig    Json
+  templateId       String
+  fieldMappings    Json     @default("{}")
+  conditions       Json     @default("{}")
+  attachmentConfig Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  template     Template     @relation(fields: [templateId], references: [id])
+
+  @@index([organizationId])
+  @@index([whatsappAccount])
+  @@index([isEnabled])
+}
+
+model CallLog {
+  id                 String          @id @default(cuid())
+  organizationId     String
+  whatsappAccount    String
+  contactId          String?
+  whatsappCallId     String?
+  callerPhone        String
+  direction          CallDirection
+  status             CallStatus      @default(ringing)
+  duration           Int             @default(0)
+  ivrFlowId          String?
+  ivrPath            Json?
+  agentId            String?
+  startedAt          DateTime?
+  answeredAt         DateTime?
+  endedAt            DateTime?
+  disconnectedBy     DisconnectedBy?
+  errorMessage       String?
+  recordingS3Key     String?
+  recordingDuration  Int             @default(0)
+  recordingError     String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  contact      Contact?     @relation(fields: [contactId], references: [id])
+  ivrFlow      IVRFlow?     @relation(fields: [ivrFlowId], references: [id])
+  agent        User?        @relation("CallLogAgent", fields: [agentId], references: [id])
+  transfers    CallTransfer[]
+
+  @@index([organizationId])
+  @@index([whatsappCallId])
+  @@index([contactId])
+  @@index([status])
+}
+
+model IVRFlow {
+  id               String   @id @default(cuid())
+  organizationId   String
+  whatsappAccount  String
+  name             String
+  description      String?
+  isActive         Boolean  @default(true)
+  isCallStart      Boolean  @default(false)
+  isOutgoingEnd    Boolean  @default(false)
+  menu             Json?
+  welcomeAudioUrl  String?
+  createdById      String?
+  updatedById      String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User?        @relation("IVRFlowCreatedBy", fields: [createdById], references: [id])
+  updatedBy    User?        @relation("IVRFlowUpdatedBy", fields: [updatedById], references: [id])
+  callLogs     CallLog[]
+
+  @@index([organizationId])
+  @@index([whatsappAccount])
+  @@index([isActive])
+}
+
+model CallTransfer {
+  id                 String   @id @default(cuid())
+  organizationId     String
+  callLogId          String
+  whatsappCallId     String
+  callerPhone        String
+  contactId          String?
+  whatsappAccount    String
+  status             String   @default("waiting")
+  teamId             String?
+  agentId            String?
+  initiatingAgentId  String?
+  transferredAt      DateTime @default(now())
+  connectedAt        DateTime?
+  completedAt        DateTime?
+  holdDuration       Int      @default(0)
+  talkDuration       Int      @default(0)
+  ivrPath            Json?
+  triedAgentIds      Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  callLog           CallLog      @relation(fields: [callLogId], references: [id], onDelete: Cascade)
+  contact           Contact?     @relation(fields: [contactId], references: [id])
+  agent             User?        @relation("CallTransferAgent", fields: [agentId], references: [id])
+  initiatingAgent   User?        @relation("CallTransferInitiator", fields: [initiatingAgentId], references: [id])
+
+  @@index([organizationId])
+  @@index([whatsappCallId])
+  @@index([status])
+  @@index([contactId])
+}
+
+model CallPermission {
+  id               String   @id @default(cuid())
+  organizationId   String
+  contactId        String
+  whatsappAccount  String
+  status           String   @default("pending")
+  messageId        String?
+  requestedAt      DateTime @default(now())
+  respondedAt      DateTime?
+  expiresAt        DateTime?
+  requestedById    String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  contact      Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  requestedBy  User?        @relation("CallPermissionRequestedBy", fields: [requestedById], references: [id])
+
+  @@index([organizationId])
+  @@index([contactId])
+  @@index([status])
+}
+
+model CannedResponse {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  shortcut       String?
+  content        String
+  category       String?
+  isActive       Boolean  @default(true)
+  usageCount     Int      @default(0)
+  buttons        Json     @default("[]")
+  createdById    String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("CannedResponseCreatedBy", fields: [createdById], references: [id])
+
+  @@index([organizationId])
+  @@index([shortcut])
+}
+
+model Catalog {
+  id              String   @id @default(cuid())
+  organizationId  String
+  whatsappAccount String?
+  metaCatalogId   String   @unique
+  name            String
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  products     CatalogProduct[]
+
+  @@index([organizationId])
+  @@index([whatsappAccount])
+}
+
+model CatalogProduct {
+  id             String   @id @default(cuid())
+  organizationId String
+  catalogId      String
+  metaProductId  String   @unique
+  name           String
+  description    String?
+  price          Int
+  currency       String   @default("USD")
+  url            String?
+  imageUrl       String?
+  retailerId     String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  catalog      Catalog      @relation(fields: [catalogId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([catalogId])
+  @@index([retailerId])
+}
+
+model ConversationNote {
+  id             String   @id @default(cuid())
+  organizationId String
+  contactId      String
+  createdById    String
+  content        String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  contact      Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("ConversationNoteCreatedBy", fields: [createdById], references: [id])
+
+  @@index([organizationId])
+  @@index([contactId])
+  @@index([createdById])
+}
+
+model Widget {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String?
+  name           String
+  description    String?
+  dataSource     String
+  metric         String
+  field          String?
+  filters        Json     @default("[]")
+  displayType    String   @default("number")
+  chartType      String?
+  groupByField   String?
+  showChange     Boolean  @default(true)
+  color          String?
+  size           String   @default("small")
+  displayOrder   Int      @default(0)
+  gridX          Int      @default(0)
+  gridY          Int      @default(0)
+  gridW          Int      @default(0)
+  gridH          Int      @default(0)
+  config         Json     @default("{}")
+  isShared       Boolean  @default(false)
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User?        @relation("WidgetCreatedBy", fields: [userId], references: [id])
+
+  @@index([organizationId])
+  @@index([userId])
+}
+
+model AuditLog {
+  id             String     @id @default(cuid())
+  organizationId String
+  resourceType   String
+  resourceId     String
+  userId         String
+  userName       String
+  action         AuditAction
+  changes        Json       @default("[]")
+  createdAt      DateTime   @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation("AuditLogUser", fields: [userId], references: [id])
+
+  @@index([organizationId])
+  @@index([resourceType, resourceId])
+  @@index([createdAt])
+}
+
+model AgentTransfer {
+  id                    String         @id @default(cuid())
+  organizationId        String
+  contactId             String
+  contactPhone          String
+  whatsappAccount       String
+  status                TransferStatus @default(active)
+  source                String         @default("manual")
+  agentId               String?
+  teamId                String?
+  transferredByUserId   String?
+  resumedById           String?
+  notes                 String         @default("")
+  transferredAt         DateTime       @default(now())
+  resumedAt             DateTime?
+  slaResponseDeadline   DateTime?
+  slaResolutionDeadline DateTime?
+  slaBreached           Boolean        @default(false)
+  escalationLevel       Int            @default(0)
+  escalatedAt           DateTime?
+  pickedUpAt            DateTime?
+  queueTimeMins         Int       @default(0)
+  resolutionTimeMins    Int       @default(0)
+  expiresAt             DateTime?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  contact         Contact      @relation(fields: [contactId], references: [id])
+  agent           User?        @relation("TransferAgent", fields: [agentId], references: [id])
+  team            Team?        @relation(fields: [teamId], references: [id])
+  transferredBy   User?        @relation("TransferInitiator", fields: [transferredByUserId], references: [id])
+  resumedBy       User?        @relation("TransferResumer", fields: [resumedById], references: [id])
+
+  @@index([organizationId])
+  @@index([contactId])
+  @@index([status])
+  @@index([agentId])
+  @@index([teamId])
+}
+
+model ChatbotSettings {
+  id                String   @id @default(cuid())
+  organizationId    String
+  whatsAppAccount   String   @default("")
+  isEnabled         Boolean  @default(true)
+  slaEnabled        Boolean  @default(false)
+  assignToSameAgent Boolean  @default(false)
+  autoResumeTimeout Int      @default(3600)
+  sla               Json     @default("{}")
+  ai                Json     @default("{}")
+  agentAssignment   Json     @default("{}")
+  businessHours     Json     @default("{}")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, whatsAppAccount])
+  @@index([organizationId])
+}
+
+model KeywordRule {
+  id              String   @id @default(cuid())
+  organizationId  String
+  whatsAppAccount String   @default("")
+  keywords        String[]
+  matchType       String   @default("contains")
+  responseType    String   @default("text")
+  responseConfig  Json     @default("{}")
+  priority        Int      @default(0)
+  isEnabled       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([whatsAppAccount])
+}
+
+model ChatbotFlow {
+  id              String   @id @default(cuid())
+  organizationId  String
+  name            String
+  triggerKeywords String[]
+  steps           Json     @default("[]")
+  isEnabled       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+model AIContext {
+  id              String   @id @default(cuid())
+  organizationId  String
+  whatsAppAccount String   @default("")
+  name            String
+  triggerKeywords String[]
+  context         String
+  priority        Int      @default(0)
+  isEnabled       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([whatsAppAccount])
+}
+
+model ChatbotSession {
+  id             String   @id @default(cuid())
+  organizationId String
+  contactId      String
+  status         String   @default("active")
+  startedAt      DateTime @default(now())
+  completedAt    DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  contact      Contact      @relation(fields: [contactId], references: [id])
+
+  @@index([organizationId])
+  @@index([contactId])
+  @@index([status])
+}
+
+model Tag {
+  organizationId String
+  name           String
+  color          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@id([organizationId, name])
+  @@index([organizationId])
+}
+
+model RefreshToken {
+  id          String   @id @default(cuid())
+  token       String   @unique
+  jti         String   @unique
+  userId      String
+  tenantId    String
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([jti])
+  @@index([userId])
+}
+
+model UserAvailabilityLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  action         String
+  startedAt      DateTime @default(now())
+  endedAt        DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([startedAt])
+}
+
+// ==================== FEATURE MANAGEMENT ====================
+model Feature {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  name        String
+  description String?
+  category    String
+  isEnabled   Boolean  @default(true)
+  configSchema Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenantFeatures TenantFeature[]
+  featureUsages  FeatureUsage[]
+
+  @@index([category])
+  @@index([isEnabled])
+}
+
+// تفعيل الأداة لمستأجر معين (مع إمكانية إعدادات خاصة)
+model TenantFeature {
+  id         String   @id @default(cuid())
+  tenantId   String
+  featureId  String
+  isActive   Boolean  @default(true)
+  settings   Json?    @default("{}")
+  usageCount Int      @default(0)
+  lastUsedAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tenant  Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  feature Feature      @relation(fields: [featureId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, featureId])
+  @@index([tenantId, isActive])
+}
+
+// سجل استخدام الأداة (للتحليل والتدقيق)
+model FeatureUsage {
+  id         String   @id @default(cuid())
+  tenantId   String
+  userId     String
+  featureId  String
+  action     String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  tenant Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  feature Feature     @relation(fields: [featureId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, featureId, userId, createdAt])
+  @@index([createdAt])
+  @@index([action])
+}
+
+// ==================== TWITTER SCRAPER ====================
+model TwitterAccount {
+  id              String   @id @default(cuid())
+  tenantId        String
+  username        String   @unique
+  email           String
+  password        String   // Encrypted
+  phoneNumber     String?
+
+  // Account status
+  status          String   @default("active") // active, rate_limited, blocked, requires_verification
+  isActive        Boolean  @default(true)
+
+  // Rate limiting
+  requestsToday   Int      @default(0)
+  lastRequestAt   DateTime?
+
+  // Session management
+  cookies         Json?    // Encrypted cookies
+  authToken       String?  // Bearer token (encrypted)
+  csrfToken       String?
+
+  // Metadata
+  proxyId         String?  // Optional dedicated proxy
+  userAgent       String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tenant Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sessions TwitterSession[]
+  jobs     ScrapingJob[]
+
+  @@index([tenantId, status])
+  @@index([username])
+}
+
+model TwitterSession {
+  id          String   @id @default(cuid())
+  accountId   String
+  sessionToken String  @unique
+  cookies     Json
+  expiresAt   DateTime
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  account TwitterAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, isActive])
+  @@index([expiresAt])
+}
+
+// ==================== SCRAPER SYSTEM ====================
+model ScrapingJob {
+  id          String   @id @default(cuid())
+  tenantId    String
+  userId      String
+  platform    String   // instagram, twitter, linkedin, tiktok
+  type        String   // profile, posts, followers, hashtag, search
+  target      String   // username, URL, or hashtag
+  options     Json     @default("{}")
+  status      String   // pending, running, completed, failed, cancelled
+  progress    Int      @default(0)
+  error       String?
+
+  // Twitter specific
+  twitterAccountId String?
+  twitterAccount   TwitterAccount? @relation(fields: [twitterAccountId], references: [id])
+
+  // Job configuration
+  config Json? // twitter-specific config (include_replies, include_retweets, etc)
+
+  results     ScrapedData[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
+  @@index([createdAt])
+  @@index([platform])
+}
+
+model ScrapedData {
+  id         String   @id @default(cuid())
+  jobId      String
+  platform   String
+  type       String
+  data       Json     // The actual scraped data
+  sourceUrl  String
+  scrapedAt  DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  job ScrapingJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@index([platform, scrapedAt])
+}
+
+model ScraperRequestLog {
+  id        String   @id @default(cuid())
+  tenantId  String
+  userId    String
+  jobId     String
+  platform  String
+  target    String
+  timestamp DateTime @default(now())
+
+  tenant Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, timestamp])
+  @@index([jobId])
+}
+
+model GroupJoinRequest {
+  id          String   @id @default(cuid())
+  tenantId    String
+  userId      String
+  groupId     String
+  groupName   String
+  inviteLink  String
+  autoJoin    Boolean  @default(false)
+  status      String   @default("pending")
+  error       String?
+  requestedAt DateTime @default(now())
+  approvedAt  DateTime?
+  joinedAt    DateTime?
+
+  tenant Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, userId, status])
+  @@index([groupId])
+}
+
+model UserGroupMembership {
+  id         String   @id @default(cuid())
+  tenantId   String
+  userId     String
+  groupId    String
+  groupName  String
+  inviteLink String
+  joinedAt   DateTime @default(now())
+  leftAt     DateTime?
+  isActive   Boolean  @default(true)
+  lastActive DateTime?
+
+  tenant Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, userId, groupId])
+  @@index([tenantId, userId, isActive])
+}
+
+model JoinConsent {
+  id            String   @id @default(cuid())
+  tenantId      String
+  userId        String
+  consentGiven  Boolean  @default(true)
+  consentAt     DateTime @default(now())
+  ipAddress     String?
+  revokedAt     DateTime?
+  revokedReason String?
+
+  tenant Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tenantId])
+}

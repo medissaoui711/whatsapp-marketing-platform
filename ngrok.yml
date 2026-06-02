@@ -1,0 +1,9 @@
+version: "2"
+authtoken: ${NGROK_AUTH_TOKEN}
+tunnels:
+  webhook:
+    proto: http
+    addr: 3000
+    inspect: false
+    bind_tls: true
+    subdomain: ${NGROK_SUBDOMAIN}

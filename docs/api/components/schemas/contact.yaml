@@ -1,0 +1,121 @@
+Contact:
+  type: object
+  properties:
+    id:
+      type: string
+      example: cm0xqj0h00001e3f3h0g0g0g0
+    firstName:
+      type: string
+      nullable: true
+      example: أحمد
+    lastName:
+      type: string
+      nullable: true
+      example: محمد
+    phone:
+      type: string
+      nullable: true
+      example: "+966501234567"
+    email:
+      type: string
+      format: email
+      nullable: true
+      example: ahmed@example.com
+    platformId:
+      type: string
+      nullable: true
+      description: المعرف على المنصة الأصلية (Twitter ID, Instagram ID)
+    platformUrl:
+      type: string
+      nullable: true
+      example: https://twitter.com/ahmed
+    source:
+      type: string
+      enum: [manual, scraper, import, webhook]
+      example: scraper
+    tags:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+          name:
+            type: string
+          color:
+            type: string
+    groups:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+          name:
+            type: string
+    createdAt:
+      type: string
+      format: date-time
+    updatedAt:
+      type: string
+      format: date-time
+
+ContactCreate:
+  type: object
+  properties:
+    firstName:
+      type: string
+    lastName:
+      type: string
+    phone:
+      type: string
+      pattern: '^\+\d{10,15}$'
+      description: رقم الهاتف بصيغة دولية (مثال: +966501234567)
+    email:
+      type: string
+      format: email
+    tags:
+      type: array
+      items:
+        type: string
+        description: معرفات العلامات (Tag IDs)
+    groups:
+      type: array
+      items:
+        type: string
+        description: معرفات المجموعات (Group IDs)
+
+ContactUpdate:
+  type: object
+  properties:
+    firstName:
+      type: string
+    lastName:
+      type: string
+    phone:
+      type: string
+      pattern: '^\+\d{10,15}$'
+    email:
+      type: string
+      format: email
+    tags:
+      type: array
+      items:
+        type: string
+    groups:
+      type: array
+      items:
+        type: string
+
+ContactListResponse:
+  type: object
+  properties:
+    success:
+      type: boolean
+      example: true
+    data:
+      type: array
+      items:
+        $ref: '#/Contact'
+    meta:
+      $ref: './common.yaml#/Pagination'

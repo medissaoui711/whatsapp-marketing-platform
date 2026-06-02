@@ -1,0 +1,39 @@
+name: Final Production Launch
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_launch:
+        description: 'Type "LAUNCH" to confirm production deployment'
+        required: true
+        type: string
+
+jobs:
+  final-launch:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm_launch == 'LAUNCH'
+    
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: ✈️ Run Pre-flight Check
+        run: bash scripts/pre-flight-check.sh
+
+      - name: 🚀 Execute Deployment
+        run: bash scripts/deploy.sh
+
+      - name: ✅ Verify Production
+        run: |
+          sleep 30
+          curl -f https://api.scrapersaas.com/api/health || exit 1
+
+      - name: 📢 Launch Announcement
+        uses: slackapi/slack-github-action@v1.25
+        with:
+          payload: |
+            {
+              "text": "🚀 **SCRAPER SAAS PLATFORM IS NOW LIVE!**\n\n✅ Production deployment completed successfully.\n✅ All systems operational.\n✅ Ready for first users.\n\nhttps://api.scrapersaas.com"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
