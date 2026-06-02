@@ -7,12 +7,12 @@ const globalForPrisma = globalThis as unknown as {
   prisma: ReturnType<typeof createExtendedClient> | undefined
 };
 
-function createExtendedClient() {
+function createExtendedClient(): PrismaClient {
   const base = getRawPrisma();
   const isEdgeRuntime = typeof (globalThis as Record<string, unknown>).EdgeRuntime === 'string';
-  const extended = isEdgeRuntime ? base : base.$extends(getEncryptionExtension());
+  const extended = isEdgeRuntime ? base : (base.$extends(getEncryptionExtension()) as PrismaClient);
 
-  initializeTenantMiddleware(extended as unknown as PrismaClient);
+  initializeTenantMiddleware(extended);
 
   return extended;
 }
@@ -25,6 +25,9 @@ if (process.env.NODE_ENV !== 'production') {
 
 export * from '@prisma/client'
 export { encryptField, decryptField }
+export const getTenantAwarePrisma = () => {
+  return prisma;
+};
 export { createPrismaClient, disconnectDatabase, testConnection }
 export { getRedis, closeRedis, testRedisConnection, createRedisClient } from './redis'
 export {
@@ -36,7 +39,6 @@ export {
   formatPhoneWithCountryCode,
 } from './contact'
 
-export { getTenantAwarePrisma } from './client'
 export { organizationService } from './services/tenant.service'
 export { BaseRepository } from './repositories/base.repository'
 export { ContactRepository, contactRepository } from './repositories/contact.repository'

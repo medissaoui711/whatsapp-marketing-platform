@@ -5,5 +5,4 @@ export declare const email: {
     send: typeof sendEmail;
     configure: typeof configureEmail;
 };
-
-
+//# sourceMappingURL=email.d.ts.map

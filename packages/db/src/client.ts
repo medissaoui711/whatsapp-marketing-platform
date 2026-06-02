@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 type PrismaAction =
   | 'findUnique' | 'findFirst' | 'findMany'
@@ -7,8 +7,7 @@ type PrismaAction =
   | 'delete'
   | 'aggregate' | 'groupBy' | 'count';
 
-interface PrismaParams {
-  model?: string;
+interface PrismaParams extends Prisma.MiddlewareParams {
   action: PrismaAction;
   args: any;
   context?: Record<string, unknown>;
@@ -35,7 +34,7 @@ const globalForPrisma = globalThis as unknown as {
 export function initializeTenantMiddleware(prisma: PrismaClient) {
   if (globalForPrisma.tenantMiddlewareInstalled) return;
 
-  prisma.$use(async (params: PrismaParams, next) => {
+  prisma.$use(async (params: Prisma.MiddlewareParams, next: Prisma.MiddlewareNext) => {
     const organizationId = params.context?.organizationId as string | undefined;
     const isSuperAdmin = params.context?.isSuperAdmin === true;
 

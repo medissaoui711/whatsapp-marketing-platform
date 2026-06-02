@@ -14,5 +14,4 @@ export declare function createPrismaClient(config?: DatabaseConfig): PrismaClien
 export declare function getPrisma(): PrismaClient;
 export declare function disconnectDatabase(): Promise<void>;
 export declare function testConnection(): Promise<boolean>;
-
-
+//# sourceMappingURL=connection.d.ts.map

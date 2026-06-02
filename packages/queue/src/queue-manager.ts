@@ -1,10 +1,9 @@
-import { Queue, QueueScheduler } from 'bullmq';
+import { Queue } from 'bullmq';
 import { QUEUE_NAMES, QueueConfig, createQueueConfig, getRedisConnection } from './config';
 import type { RecipientJob, WebhookDeliveryJob, ImportContactsJob, ExportDataJob, CampaignStatsUpdateJob, CleanupAuditLogsJob, ProcessRecordingJob } from './types';
 
 export class QueueManager {
   private queues: Map<string, Queue> = new Map();
-  private schedulers: Map<string, QueueScheduler> = new Map();
   private config: QueueConfig;
 
   constructor(config: QueueConfig) {
@@ -15,23 +14,11 @@ export class QueueManager {
     if (!this.queues.has(name)) {
       const queue = new Queue(name, createQueueConfig(this.config));
       this.queues.set(name, queue);
-      this.getScheduler(name);
       queue.on('added', (job) => {
         console.debug(`[QueueManager] Job ${job.id} added to queue ${name}`);
       });
     }
     return this.queues.get(name)!;
-  }
-
-  private getScheduler(name: string): QueueScheduler {
-    if (!this.schedulers.has(name)) {
-      const scheduler = new QueueScheduler(name, {
-        connection: getRedisConnection(),
-        prefix: this.config.prefix || 'whatomate',
-      });
-      this.schedulers.set(name, scheduler);
-    }
-    return this.schedulers.get(name)!;
   }
 
   async addRecipientJob(job: RecipientJob, priority?: number): Promise<string> {
@@ -169,9 +156,6 @@ export class QueueManager {
   async close(): Promise<void> {
     for (const queue of this.queues.values()) {
       await queue.close();
-    }
-    for (const scheduler of this.schedulers.values()) {
-      await scheduler.close();
     }
   }
 }

@@ -11,5 +11,4 @@ export declare function createRedisClient(config?: RedisConfig): Redis;
 export declare function getRedis(): Redis;
 export declare function closeRedis(): Promise<void>;
 export declare function testRedisConnection(): Promise<boolean>;
-
-
+//# sourceMappingURL=redis.d.ts.map

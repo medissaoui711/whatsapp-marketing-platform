@@ -5,5 +5,4 @@ export declare class WebhookParser {
     static hasMessages(body: Record<string, unknown>): boolean;
     static hasStatuses(body: Record<string, unknown>): boolean;
 }
-
-
+//# sourceMappingURL=webhook.d.ts.map

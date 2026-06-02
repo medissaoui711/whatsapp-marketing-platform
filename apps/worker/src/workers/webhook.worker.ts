@@ -47,7 +47,7 @@ export class WebhookWorker {
         data: {
           webhookId,
           success: response.ok,
-          statusCode: response.status,
+          responseCode: response.status,
           responseBody: await response.text().catch(() => null),
           payload,
           retryCount,

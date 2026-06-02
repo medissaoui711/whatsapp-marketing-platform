@@ -27,5 +27,4 @@ export interface UploadResult {
     size: number;
     mimeType: string;
 }
-
-
+//# sourceMappingURL=types.d.ts.map

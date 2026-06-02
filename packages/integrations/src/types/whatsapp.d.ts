@@ -93,5 +93,4 @@ export interface ProductInput {
     retailerId: string;
     description?: string;
 }
-
-
+//# sourceMappingURL=whatsapp.d.ts.map

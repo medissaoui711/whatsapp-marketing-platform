@@ -20,5 +20,4 @@ export declare abstract class BaseRepository<T> {
     update(id: string, data: any, options?: RepositoryOptions): Promise<T>;
     delete(id: string, options?: RepositoryOptions): Promise<T>;
 }
-
-
+//# sourceMappingURL=base.repository.d.ts.map

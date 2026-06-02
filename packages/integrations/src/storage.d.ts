@@ -7,5 +7,4 @@ export declare const storage: {
     delete: typeof deleteFile;
     configure: typeof configureStorage;
 };
-
-
+//# sourceMappingURL=storage.d.ts.map

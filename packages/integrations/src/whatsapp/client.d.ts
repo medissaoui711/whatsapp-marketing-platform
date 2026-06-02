@@ -3,7 +3,7 @@ export declare class WhatsAppClient {
     private logger?;
     private httpClient;
     private baseURL;
-    constructor(logger?: Console | undefined);
+    constructor(logger?: Console);
     setBaseURL(url: string): void;
     private getBaseURL;
     private doRequest;
@@ -104,5 +104,4 @@ export declare class WhatsAppClient {
     private getTemplateAnalytics;
     private normalizeGranularity;
 }
-
-
+//# sourceMappingURL=client.d.ts.map

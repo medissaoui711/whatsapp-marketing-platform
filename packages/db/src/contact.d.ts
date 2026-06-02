@@ -7,5 +7,4 @@ export declare function getOrCreateContact(organizationId: string, phoneNumber: 
 export declare function updateContactLastMessage(contactId: string, preview: string): Promise<void>;
 export declare function updateContactLastInbound(contactId: string): Promise<void>;
 export declare function isServiceWindowOpen(lastInboundAt: Date | null): boolean;
-
-
+//# sourceMappingURL=contact.d.ts.map

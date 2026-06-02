@@ -12,11 +12,11 @@ export interface AuthContext {
 }
 
 export interface ApiHandler<T = any> {
-  (request: NextRequest, context: AuthContext, ...args: any[]): Promise<NextResponse<T>>;
+  (request: Request | NextRequest, context: AuthContext, ...args: any[]): Promise<NextResponse<T>>;
 }
 
-export function withAuth(handler: ApiHandler) {
-  return async (request: NextRequest, ...args: any[]): Promise<NextResponse> => {
+export function withAuth(handler: ApiHandler): (request: Request | NextRequest, ...args: any[]) => Promise<NextResponse> {
+  return async (request: Request | NextRequest, ...args: any[]): Promise<NextResponse> => {
     const authHeader = request.headers.get('authorization');
 
     if (!authHeader?.startsWith('Bearer ')) {

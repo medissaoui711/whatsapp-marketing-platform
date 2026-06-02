@@ -19,5 +19,4 @@ export declare function getEncryptionExtension(): (client: any) => {
         }>;
     };
 };
-
-
+//# sourceMappingURL=encryption-extension.d.ts.map

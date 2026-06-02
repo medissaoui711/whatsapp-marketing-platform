@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { toast } from '@/components/ui';
+import { useToast } from '@/components/ui';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 
@@ -37,6 +37,7 @@ function getAccessToken(): string | null {
 }
 
 export default function FeaturesPage() {
+  const { toast } = useToast();
   const [features, setFeatures] = useState<Feature[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);

@@ -61,7 +61,7 @@ export function createPrismaClient(config?: DatabaseConfig): PrismaClient {
   if (process.env.NODE_ENV === 'production') {
     const metricsInterval = setInterval(async () => {
       try {
-        const poolInfo = await client.$metrics.json().catch(() => null);
+        const poolInfo = await (client as any).$metrics?.json().catch(() => null);
         if (poolInfo && typeof poolInfo === 'object' && 'counters' in poolInfo) {
           const counters = (poolInfo as { counters: Array<{ name: string; value: number }> }).counters;
           const active = counters.find((c) => c.name === 'prisma_pool_connections_active')?.value ?? 0;

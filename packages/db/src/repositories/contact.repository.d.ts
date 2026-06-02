@@ -18,5 +18,4 @@ export declare class ContactRepository extends BaseRepository<any> {
     removeTags(contactId: string, tags: string[], options?: RepositoryOptions): Promise<any>;
 }
 export declare const contactRepository: ContactRepository;
-
-
+//# sourceMappingURL=contact.repository.d.ts.map
